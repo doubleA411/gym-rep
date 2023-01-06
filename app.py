@@ -8,6 +8,7 @@ import cv2
 from PIL import Image, ImageTk 
 from landmarks import landmarks
 
+
 window = tk.Tk()
 window.geometry("480x700")
 window.title("Gym Rep") 
@@ -35,6 +36,8 @@ probBox.configure(text = '0')
 def reset_counter():
     global counter
     counter = 0
+    counterBox.configure(text=counter) 
+    
 
 button = ck.CTkLabel(window, text="RESET",   height= 40 , width= 120 , font = ("Arial" , 20) ,text_color="black",fg_color="blue")
 button.bind(command= reset_counter)
@@ -72,18 +75,20 @@ def detect():
         mp_drawing.DrawingSpec(color=(0,255,0), thickness=2, circle_radius = 2)) 
     try:
         # pass
+        print(current_stage)
         row = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten().tolist()
         X = pd.DataFrame([row], columns = landmarks) 
         bodylang_prob = model.predict_proba(X)[0]
         bodylang_class = model.predict(X)[0] 
 
-        if bodylang_class =="down" and bodylang_prob[bodylang_prob.argmax()] > 0.7: 
+        if bodylang_class =="down" and bodylang_prob[bodylang_prob.argmax()] > 0.5: 
             current_stage = "down" 
         elif current_stage == "down" and bodylang_class == "up" and bodylang_prob[bodylang_prob.argmax()] > 0.7:
             current_stage = "up" 
             counter += 1 
     except Exception as e:
         print(e)
+        print("Hello")
         # pass
     img = image[:, :460, :] 
     imgarr = Image.fromarray(img) 
@@ -91,5 +96,8 @@ def detect():
     lmain.imgtk = imgtk 
     lmain.configure(image=imgtk)
     lmain.after(10, detect) 
+    counterBox.configure(text=counter) 
+    probBox.configure(text=bodylang_prob[bodylang_prob.argmax()]) 
+    classBox.configure(text=current_stage) 
 detect()
 window.mainloop()
