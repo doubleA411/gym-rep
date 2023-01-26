@@ -80,6 +80,8 @@ def detect():
         X = pd.DataFrame([row], columns = landmarks) 
         bodylang_prob = model.predict_proba(X)[0]
         bodylang_class = model.predict(X)[0] 
+        # bodylang_prob = np.exp(bodylang_class) / np.sum(np.exp(bodylang_class))
+        
 
         if bodylang_class =="down" and bodylang_prob[bodylang_prob.argmax()] > 0.5: 
             current_stage = "down" 
@@ -89,6 +91,7 @@ def detect():
     except Exception as e:
         print(e)
         print("Hello")
+        type(bodylang_prob)
         # pass
     img = image[:, :460, :] 
     imgarr = Image.fromarray(img) 
